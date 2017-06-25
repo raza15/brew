@@ -15,7 +15,6 @@ module Homebrew
 
   class CommandsCommand < Command
     def initialize
-      super
       options do
         cmd_name "commands"
         desc "Show a list of built-in and external commands."
