@@ -14,7 +14,6 @@ module Homebrew
       @parent = nil
       instance_eval(&block)
       generate_help_and_manpage_output
-      check_for_errors
     end
 
     def cmd_name(cmd)

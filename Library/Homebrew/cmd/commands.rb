@@ -10,6 +10,7 @@ module Homebrew
   def commands
     # TODO: Goal is to not require this function at all.
     command = CommandsCommand.new
+    command.check_for_errors
     command.commands
   end
 
