@@ -8,8 +8,8 @@ module Homebrew
   module_function
 
   def commands
+    # TODO: Goal is to not require this function at all.
     command = CommandsCommand.new
-    command.check_for_errors
     command.commands
   end
 
@@ -18,8 +18,8 @@ module Homebrew
       options do
         cmd_name "commands"
         desc "Show a list of built-in and external commands."
-        option "quiet", desc: "list only the names of commands without the header" do
-          option "include-aliases", desc: "the aliases of internal commands will be included"
+        option "quiet", desc: "list only the names of commands without the header." do
+          option "include-aliases", desc: "the aliases of internal commands will be included."
         end
       end
     end
