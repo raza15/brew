@@ -6,7 +6,7 @@ module Homebrew
     def initialize_variables
       @valid_options = []
       @root_options = []
-      @argv = ARGV
+      @argv = ARGV.dup
     end
 
     def options(&block)
