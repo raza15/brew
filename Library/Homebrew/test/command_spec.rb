@@ -21,17 +21,7 @@ describe Homebrew::Command do
     ]
   end
 
-  it "sets error message correctly if only one invalid option provided" do
-    command = Homebrew::Command.new
-    command.initialize_variables
-    command.option "bar", desc: "go to bar"
-    argv_options = ["--foo"]
-    error_message = command.get_error_message(argv_options)
-    expect(error_message).to \
-      include("1 invalid option provided: --foo")
-  end
-
-  it "sets error message correctly if more than one invalid options provided" do
+  it "sets error message correctly if invalid options provided" do
     command_options = Homebrew::Command.new
     command_options.initialize_variables
     command_options.cmd_name "test_command"
@@ -39,10 +29,10 @@ describe Homebrew::Command do
     command_options.option "bar", desc: "go to bar"
     command_options.option "foo", desc: "do foo"
     command_options.option "quiet", desc: "be quiet"
-    argv_options = ["--bar1", "--bar2", "--bar1", "--bar", "--foo"]
-    expect(command_options.get_error_message(argv_options)).to eq <<-EOS.undent
-      2 invalid options provided: --bar1 --bar2
-    EOS
+    argv_options = ["--bar1", "--bar2", "--bar", "--foo"]
+    expect(command_options
+      .get_error_message(argv_options))
+      .to eq "Invalid option(s) provided: --bar1 --bar2"
   end
 
   it "produces no error message if no invalid options provided" do

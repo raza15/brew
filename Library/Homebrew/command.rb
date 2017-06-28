@@ -6,7 +6,7 @@ module Homebrew
     def initialize_variables
       @valid_options = []
       @root_options = []
-      @argv = ARGV.dup
+      @argv = ARGV.dup.uniq
     end
 
     def options(&block)
@@ -18,10 +18,6 @@ module Homebrew
 
     def cmd_name(cmd)
       @command_name = cmd
-    end
-
-    def add_valid_option(option_hash)
-      @valid_options.push(option_hash)
     end
 
     def option(*args, **option_hash, &block)
@@ -37,7 +33,7 @@ module Homebrew
           hash[:child_options].push(option_name)
         end
       end
-      add_valid_option(option_hash)
+      @valid_options.push(option_hash)
       return unless block_given?
       old_parent = @parent
       @parent = option_name
@@ -46,43 +42,20 @@ module Homebrew
     end
 
     def desc(desc)
-      if @description.nil?
-        @description = desc
-      else
-        @description = <<-EOS.undent
-          #{@description}
-          #{desc}
-        EOS
-                             .strip
-      end
-    end
-
-    def argv_invalid_options_passed(argv)
-      argv_options_only = argv.select { |arg| /^--/ =~ arg }
-      argv_options_only = argv_options_only.uniq
-      valid_option_names =
-        @valid_options
-        .map { |option_hash| option_hash[:option] }
-
-      argv_options_only
-        .reject { |opt| valid_option_names.include?(opt.split("=", 2)[0]) }
-        .map { |opt| opt.split("=", 2)[0] }
+      @description = desc
     end
 
     def get_error_message(argv)
-      argv_invalid_options = argv_invalid_options_passed(argv)
-      return if argv_invalid_options.empty?
-      invalid_opt_str = Formatter.pluralize(argv_invalid_options.length, "invalid option")
-      invalid_opt_str = "#{invalid_opt_str} provided: #{argv_invalid_options.join " "}"
-      <<-EOS.undent
-        #{invalid_opt_str unless argv_invalid_options.empty?}
-      EOS
+      invalid_options =
+        argv.select { |arg| /^--/ =~ arg }
+            .reject { |opt| @valid_options.map { |h| h[:option] }.include?(opt) }
+      return if invalid_options.empty?
+      "Invalid option(s) provided: #{invalid_options.join " "}"
     end
 
     def check_for_errors
       error_message = get_error_message(@argv)
       return if error_message.nil?
-      generate_help_and_manpage_output
       odie <<-EOS.undent
         #{error_message}
         Correct usage:
@@ -98,7 +71,7 @@ module Homebrew
         childs_str = child_options.map do |co|
           option_string(co)
         end.join(" ")
-        output = output.gsub(/`#{option}`/, "`#{option}` #{childs_str}")
+        output = output.gsub(/`#{option}`/, "\\0 #{childs_str}")
       end
       output
     end
